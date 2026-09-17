@@ -1,171 +1,115 @@
 -- E-Commerce Sales & Customer Analysis
--- Beginner to intermediate business questions
+-- Version 1: Analysis using only concepts learned so far
 
--- 1. Total number of customers
+-- 1. View all customers
+SELECT *
+FROM customers;
+
+-- 2. Customers from Pune
+SELECT customer_name, city
+FROM customers
+WHERE city = 'Pune';
+
+-- 3. Customers from Pune or Nashik
+SELECT customer_name, city
+FROM customers
+WHERE city IN ('Pune', 'Nashik')
+ORDER BY city, customer_name;
+
+-- 4. Customers aged between 25 and 30
+SELECT customer_name, age, city
+FROM customers
+WHERE age BETWEEN 25 AND 30
+ORDER BY age;
+
+-- 5. Premium customers
+SELECT customer_name, customer_segment
+FROM customers
+WHERE customer_segment = 'Premium'
+ORDER BY customer_name;
+
+-- 6. Different customer cities
+SELECT DISTINCT city
+FROM customers
+ORDER BY city;
+
+-- 7. Customers whose name starts with 'A'
+SELECT customer_name, city
+FROM customers
+WHERE customer_name LIKE 'A%';
+
+-- 8. Latest 5 orders
+SELECT order_id, customer_id, order_date, order_status
+FROM orders
+ORDER BY order_date DESC
+LIMIT 5;
+
+-- 9. Total number of customers
 SELECT COUNT(*) AS total_customers
 FROM customers;
 
--- 2. Total number of products
+-- 10. Total number of products
 SELECT COUNT(*) AS total_products
 FROM products;
 
--- 3. Total number of orders
+-- 11. Total number of orders
 SELECT COUNT(*) AS total_orders
 FROM orders;
 
--- 4. Total quantity sold in delivered orders
+-- 12. Total quantity sold in delivered orders
 SELECT SUM(quantity) AS total_quantity_sold
 FROM orders
 WHERE order_status = 'Delivered';
 
--- 5. Revenue by order
-SELECT
-    order_id,
-    quantity,
-    price,
-    discount,
-    ROUND(quantity * price * (1 - discount), 2) AS order_revenue
-FROM orders
-JOIN products USING (product_id)
-WHERE order_status = 'Delivered'
-ORDER BY order_revenue DESC;
+-- 13. Average product price
+SELECT ROUND(AVG(price), 2) AS average_product_price
+FROM products;
 
--- 6. Total revenue
-SELECT ROUND(SUM(quantity * price * (1 - discount)), 2) AS total_revenue
+-- 14. Cheapest and most expensive product price
+SELECT
+    MIN(price) AS lowest_price,
+    MAX(price) AS highest_price
+FROM products;
+
+-- 15. Total revenue from delivered orders
+SELECT ROUND(SUM(quantity * unit_price * (1 - discount)), 2) AS total_revenue
 FROM orders
-JOIN products USING (product_id)
 WHERE order_status = 'Delivered';
 
--- 7. Average order value
-SELECT ROUND(AVG(order_value), 2) AS average_order_value
-FROM (
-    SELECT order_id,
-           SUM(quantity * price * (1 - discount)) AS order_value
-    FROM orders
-    JOIN products USING (product_id)
-    WHERE order_status = 'Delivered'
-    GROUP BY order_id
-) AS order_summary;
-
--- 8. Customers by city
-SELECT city, COUNT(*) AS customer_count
-FROM customers
-GROUP BY city
-ORDER BY customer_count DESC;
-
--- 9. Revenue by city
-SELECT
-    c.city,
-    ROUND(SUM(o.quantity * p.price * (1 - o.discount)), 2) AS revenue
-FROM customers c
-JOIN orders o ON c.customer_id = o.customer_id
-JOIN products p ON o.product_id = p.product_id
-WHERE o.order_status = 'Delivered'
-GROUP BY c.city
-ORDER BY revenue DESC;
-
--- 10. Top customers by spending
-SELECT
-    c.customer_id,
-    c.customer_name,
-    ROUND(SUM(o.quantity * p.price * (1 - o.discount)), 2) AS total_spending
-FROM customers c
-JOIN orders o ON c.customer_id = o.customer_id
-JOIN products p ON o.product_id = p.product_id
-WHERE o.order_status = 'Delivered'
-GROUP BY c.customer_id, c.customer_name
-ORDER BY total_spending DESC
-LIMIT 10;
-
--- 11. Customers with more than one order
-SELECT
-    c.customer_id,
-    c.customer_name,
-    COUNT(o.order_id) AS order_count
-FROM customers c
-JOIN orders o ON c.customer_id = o.customer_id
-WHERE o.order_status = 'Delivered'
-GROUP BY c.customer_id, c.customer_name
-HAVING COUNT(o.order_id) > 1
-ORDER BY order_count DESC;
-
--- 12. Product sales quantity
-SELECT
-    p.product_name,
-    SUM(o.quantity) AS quantity_sold
-FROM products p
-JOIN orders o ON p.product_id = o.product_id
-WHERE o.order_status = 'Delivered'
-GROUP BY p.product_name
-ORDER BY quantity_sold DESC;
-
--- 13. Product revenue
-SELECT
-    p.product_name,
-    p.category,
-    ROUND(SUM(o.quantity * p.price * (1 - o.discount)), 2) AS revenue
-FROM products p
-JOIN orders o ON p.product_id = o.product_id
-WHERE o.order_status = 'Delivered'
-GROUP BY p.product_name, p.category
-ORDER BY revenue DESC;
-
--- 14. Revenue by category
-SELECT
-    p.category,
-    ROUND(SUM(o.quantity * p.price * (1 - o.discount)), 2) AS revenue
-FROM products p
-JOIN orders o ON p.product_id = o.product_id
-WHERE o.order_status = 'Delivered'
-GROUP BY p.category
-ORDER BY revenue DESC;
-
--- 15. Profit by product
-SELECT
-    p.product_name,
-    ROUND(SUM(o.quantity * ((p.price * (1 - o.discount)) - p.cost)), 2) AS estimated_profit
-FROM products p
-JOIN orders o ON p.product_id = o.product_id
-WHERE o.order_status = 'Delivered'
-GROUP BY p.product_name
-ORDER BY estimated_profit DESC;
-
--- 16. Payment method usage
-SELECT payment_method, COUNT(*) AS order_count
+-- 16. Highest-value delivered order
+SELECT order_id,
+       customer_id,
+       product_id,
+       ROUND(quantity * unit_price * (1 - discount), 2) AS order_value
 FROM orders
-GROUP BY payment_method
-ORDER BY order_count DESC;
+WHERE order_status = 'Delivered'
+  AND quantity * unit_price * (1 - discount) = (
+      SELECT MAX(quantity * unit_price * (1 - discount))
+      FROM orders
+      WHERE order_status = 'Delivered'
+  );
 
--- 17. Order status distribution
-SELECT order_status, COUNT(*) AS order_count
+-- 17. Delivered orders between two dates
+SELECT order_id, order_date, customer_id
 FROM orders
-GROUP BY order_status
-ORDER BY order_count DESC;
+WHERE order_status = 'Delivered'
+  AND order_date BETWEEN '2025-06-01' AND '2025-09-30'
+ORDER BY order_date;
 
--- 18. Cancelled and returned order percentage
-SELECT
-    ROUND(100.0 * COUNT(*) FILTER (WHERE order_status IN ('Cancelled', 'Returned')) / COUNT(*), 2)
-        AS cancelled_or_returned_percentage
-FROM orders;
+-- 18. Orders paid using UPI or Card
+SELECT order_id, payment_method, order_status
+FROM orders
+WHERE payment_method IN ('UPI', 'Card')
+ORDER BY order_id;
 
--- 19. Monthly revenue
-SELECT
-    EXTRACT(MONTH FROM o.order_date) AS month_number,
-    ROUND(SUM(o.quantity * p.price * (1 - o.discount)), 2) AS revenue
-FROM orders o
-JOIN products p ON o.product_id = p.product_id
-WHERE o.order_status = 'Delivered'
-GROUP BY EXTRACT(MONTH FROM o.order_date)
-ORDER BY month_number;
+-- 19. Cancelled or returned orders
+SELECT order_id, customer_id, order_status
+FROM orders
+WHERE order_status IN ('Cancelled', 'Returned')
+ORDER BY order_id;
 
--- 20. Customer segment performance
-SELECT
-    c.customer_segment,
-    COUNT(DISTINCT c.customer_id) AS customers,
-    ROUND(SUM(o.quantity * p.price * (1 - o.discount)), 2) AS revenue
-FROM customers c
-JOIN orders o ON c.customer_id = o.customer_id
-JOIN products p ON o.product_id = p.product_id
-WHERE o.order_status = 'Delivered'
-GROUP BY c.customer_segment
-ORDER BY revenue DESC;
+-- 20. Orders with quantity greater than 1
+SELECT order_id, customer_id, product_id, quantity
+FROM orders
+WHERE quantity > 1
+ORDER BY quantity DESC;
