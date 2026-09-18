@@ -55,43 +55,32 @@ LIMIT 5;
 -- SECTION 2: CORE BUSINESS KPIs
 -- ============================================================
 
--- Business Question: How large is the current dataset?
-SELECT
-    COUNT(*) AS total_orders
+SELECT COUNT(*) AS total_orders
 FROM orders;
 
-SELECT
-    COUNT(*) AS total_customers
+SELECT COUNT(*) AS total_customers
 FROM customers;
 
-SELECT
-    COUNT(*) AS total_products
+SELECT COUNT(*) AS total_products
 FROM products;
 
--- Business Question: How many units were sold in delivered orders?
-SELECT
-    SUM(quantity) AS total_quantity_sold
+SELECT SUM(quantity) AS total_quantity_sold
 FROM orders
 WHERE order_status = 'Delivered';
 
--- Business Question: What is the average product price?
-SELECT
-    ROUND(AVG(price), 2) AS average_product_price
+SELECT ROUND(AVG(price), 2) AS average_product_price
 FROM products;
 
--- Business Question: What are the lowest and highest product prices?
 SELECT
     MIN(price) AS lowest_price,
     MAX(price) AS highest_price
 FROM products;
 
--- Business Question: What is total delivered revenue?
 SELECT
     ROUND(SUM(quantity * unit_price * (1 - discount)), 2) AS total_revenue
 FROM orders
 WHERE order_status = 'Delivered';
 
--- Business Question: What is the average delivered order value?
 SELECT
     ROUND(AVG(quantity * unit_price * (1 - discount)), 2) AS average_order_value
 FROM orders
@@ -101,7 +90,6 @@ WHERE order_status = 'Delivered';
 -- SECTION 3: ORDER STATUS ANALYSIS
 -- ============================================================
 
--- Business Question: How many orders fall into each status?
 SELECT
     order_status,
     COUNT(*) AS order_count
@@ -109,7 +97,6 @@ FROM orders
 GROUP BY order_status
 ORDER BY order_count DESC;
 
--- Business Question: Which orders were cancelled or returned?
 SELECT
     order_id,
     customer_id,
@@ -118,20 +105,19 @@ FROM orders
 WHERE order_status IN ('Cancelled', 'Returned')
 ORDER BY order_id;
 
--- Business Question: What percentage of all orders were cancelled or returned?
+-- Basic subquery version of the unsuccessful-order percentage.
 SELECT
     ROUND(
-        COUNT(*) FILTER (WHERE order_status IN ('Cancelled', 'Returned')) * 100.0
-        / COUNT(*),
+        COUNT(*) * 100.0 / (SELECT COUNT(*) FROM orders),
         2
     ) AS unsuccessful_order_percentage
-FROM orders;
+FROM orders
+WHERE order_status IN ('Cancelled', 'Returned');
 
 -- ============================================================
 -- SECTION 4: PAYMENT METHOD ANALYSIS
 -- ============================================================
 
--- Business Question: Which payment method is used most often?
 SELECT
     payment_method,
     COUNT(*) AS order_count
@@ -140,16 +126,16 @@ WHERE order_status = 'Delivered'
 GROUP BY payment_method
 ORDER BY order_count DESC;
 
--- Business Question: Which payment method generates the most delivered revenue?
 SELECT
     payment_method,
+    COUNT(*) AS order_count,
+    SUM(quantity) AS total_quantity,
     ROUND(SUM(quantity * unit_price * (1 - discount)), 2) AS total_revenue
 FROM orders
 WHERE order_status = 'Delivered'
 GROUP BY payment_method
 ORDER BY total_revenue DESC;
 
--- Business Question: How many units were sold through each payment method?
 SELECT
     payment_method,
     SUM(quantity) AS total_quantity
@@ -162,7 +148,6 @@ ORDER BY total_quantity DESC;
 -- SECTION 5: CUSTOMER ANALYSIS
 -- ============================================================
 
--- Business Question: Which customers are repeat purchasers?
 SELECT
     customer_id,
     COUNT(*) AS delivered_orders
@@ -172,7 +157,6 @@ GROUP BY customer_id
 HAVING COUNT(*) > 1
 ORDER BY delivered_orders DESC, customer_id;
 
--- Business Question: Which customers generated more than 5,000 in revenue?
 SELECT
     customer_id,
     ROUND(SUM(quantity * unit_price * (1 - discount)), 2) AS total_revenue
@@ -182,7 +166,6 @@ GROUP BY customer_id
 HAVING SUM(quantity * unit_price * (1 - discount)) > 5000
 ORDER BY total_revenue DESC;
 
--- Business Question: Which customers generated the highest revenue?
 SELECT
     customer_id,
     ROUND(SUM(quantity * unit_price * (1 - discount)), 2) AS total_revenue
@@ -192,7 +175,6 @@ GROUP BY customer_id
 ORDER BY total_revenue DESC
 LIMIT 5;
 
--- Business Question: Which customers purchased more than 4 units?
 SELECT
     customer_id,
     SUM(quantity) AS total_quantity
@@ -206,7 +188,6 @@ ORDER BY total_quantity DESC;
 -- SECTION 6: GROUP BY + HAVING BUSINESS ANALYSIS
 -- ============================================================
 
--- Business Question: Which payment methods generated more than 20,000 revenue?
 SELECT
     payment_method,
     ROUND(SUM(quantity * unit_price * (1 - discount)), 2) AS total_revenue
@@ -216,7 +197,6 @@ GROUP BY payment_method
 HAVING SUM(quantity * unit_price * (1 - discount)) > 20000
 ORDER BY total_revenue DESC;
 
--- Business Question: Which customers placed more than 2 delivered orders?
 SELECT
     customer_id,
     COUNT(*) AS delivered_orders,
@@ -227,8 +207,6 @@ GROUP BY customer_id
 HAVING COUNT(*) > 2
 ORDER BY total_revenue DESC;
 
--- Business Question: Which customers generated more than 8,000 revenue
--- and placed at least 2 delivered orders?
 SELECT
     customer_id,
     COUNT(*) AS delivered_orders,
@@ -244,7 +222,6 @@ ORDER BY total_revenue DESC;
 -- SECTION 7: HIGH-VALUE ORDER ANALYSIS
 -- ============================================================
 
--- Business Question: What is the highest-value delivered order?
 SELECT
     order_id,
     customer_id,
@@ -258,7 +235,6 @@ WHERE order_status = 'Delivered'
       WHERE order_status = 'Delivered'
   );
 
--- Business Question: Which orders contain multiple units?
 SELECT
     order_id,
     customer_id,
@@ -272,7 +248,6 @@ ORDER BY quantity DESC;
 -- SECTION 8: DATE AND PAYMENT FILTERING PRACTICE
 -- ============================================================
 
--- Delivered orders between June and September 2025
 SELECT
     order_id,
     order_date,
@@ -282,7 +257,6 @@ WHERE order_status = 'Delivered'
   AND order_date BETWEEN '2025-06-01' AND '2025-09-30'
 ORDER BY order_date;
 
--- Orders paid using UPI or Card
 SELECT
     order_id,
     payment_method,
@@ -294,10 +268,9 @@ ORDER BY order_id;
 -- ============================================================
 -- SECTION 9: BUSINESS LOGIC NOTES
 -- ============================================================
--- Revenue formula used throughout the project:
+-- Revenue formula:
 -- quantity * unit_price * (1 - discount)
 --
--- Analytical rule:
 -- Delivered orders are used for revenue and sales-performance analysis.
 -- Cancelled/Returned orders are excluded from delivered-sales KPIs.
 --
