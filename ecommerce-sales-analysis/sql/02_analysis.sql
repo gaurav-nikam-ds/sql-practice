@@ -274,8 +274,6 @@ ORDER BY order_id;
 -- Delivered orders are used for revenue and sales-performance analysis.
 -- Cancelled/Returned orders are excluded from delivered-sales KPIs.
 --
--- Current limitation:
--- Customer names, product names, categories, cities and segments are
--- intentionally not combined with order-level analysis yet because JOIN
--- has not been learned. JOIN-based analysis will be added in a future
--- project version after learning the concept.
+-- Scope:
+-- This file analyses order-level metrics and customer IDs using concepts
+-- practised so far. It does not combine tables or use JOINs.
