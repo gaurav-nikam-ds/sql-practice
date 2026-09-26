@@ -1,72 +1,84 @@
 # Business Insights
 
-## Analysis Summary
+## Project Summary
 
-The project currently focuses on order, revenue, payment and repeat-customer analysis using the SQL concepts learned so far.
+I used PostgreSQL to explore a sample e-commerce dataset and answer business questions about delivered sales, order status, payment methods and repeat customers.
 
-### 1. Delivered Revenue
+**Dataset size:** 30 orders  
+**Revenue formula:** quantity × unit_price × (1 − discount)  
+**Revenue scope:** Delivered orders only. Cancelled and returned orders are excluded from delivered-sales KPIs.
 
-- **Finding:** Delivered orders generated approximately **₹81,881.10** in revenue.
-- **Business logic:** Revenue is calculated as quantity × unit price × (1 − discount), using delivered orders only.
-- **Business meaning:** This provides the current sales baseline for the dataset.
-- **Possible action:** Use delivered revenue as a baseline KPI when comparing future project versions.
+## 1. Delivered Sales Revenue
 
-### 2. Average Delivered Order Value
+- **Business question:** How much revenue did delivered orders generate?
+- **Result:** ₹81,881.10
+- **Insight:** The 28 delivered orders generated ₹81,881.10 after discounts.
+- **Business use:** This is the baseline delivered-revenue KPI for this sample dataset.
 
-- **Finding:** The average delivered order value is approximately **₹2,924.33**.
-- **Business logic:** Average the calculated order value for delivered orders.
-- **Business meaning:** This provides a simple view of the typical delivered transaction size.
-- **Possible action:** Track this KPI alongside order volume in future analysis.
+## 2. Average Delivered Order Value
 
-### 3. Order Status
+- **Business question:** What was the average value of a delivered order?
+- **Result:** ₹2,924.33
+- **Insight:** On average, each delivered order was worth ₹2,924.33 after discounts.
+- **Business use:** Track average order value alongside the number of delivered orders to understand changes in sales performance.
 
-- **Finding:** There are **28 delivered orders**, **1 cancelled order** and **1 returned order**.
-- **Business logic:** Group orders by order_status.
-- **Business meaning:** Most records in this sample are delivered, while cancellation and return records can be separately monitored.
-- **Possible action:** Investigate cancelled and returned orders in a deeper operational analysis.
+## 3. Order Status
 
-### 4. Cancelled / Returned Rate
+- **Business question:** How were orders distributed by status?
+- **Result:** 28 Delivered, 1 Cancelled and 1 Returned, out of 30 orders.
+- **Insight:** 93.33% of orders were delivered; one order was cancelled and one was returned.
+- **Business use:** Monitor order status counts to identify whether cancellations or returns increase as more data is collected.
 
-- **Finding:** Cancelled or returned orders represent approximately **6.67%** of all orders.
-- **Business logic:** Count cancelled and returned orders and compare them with total orders.
-- **Business meaning:** This gives a simple unsuccessful-order rate for the sample.
-- **Possible action:** Track this rate over time and investigate the reasons behind unsuccessful orders.
+## 4. Cancelled and Returned Order Rate
 
-### 5. Payment Method Usage
+- **Business question:** What percentage of all orders were cancelled or returned?
+- **Result:** 6.67% (2 out of 30 orders).
+- **Insight:** Two records were not delivered: one cancellation and one return.
+- **Business use:** Track this rate over a larger period and investigate the reasons behind each unsuccessful order. The sample is too small to generalize to a real business.
 
-- **Finding:** Among delivered orders, UPI has **13 orders**, Card has **12**, and Cash has **3**.
-- **Business logic:** Group delivered orders by payment_method and count orders.
-- **Business meaning:** UPI has the highest transaction count in this sample.
-- **Possible action:** Monitor payment-method usage separately from revenue contribution.
+## 5. Payment Method Usage
 
-### 6. Payment Method Revenue
+- **Business question:** Which payment methods were used for delivered orders?
+- **Result:** UPI — 13 orders; Card — 12 orders; Cash — 3 orders.
+- **Insight:** UPI had the highest delivered-order count in this dataset, followed by Card and Cash.
+- **Business use:** Compare payment-method order counts over time. Order count alone does not show profitability or customer preference for a wider population.
 
-- **Finding:** Card generated approximately **₹47,002.05**, UPI generated **₹28,573.85**, and Cash generated **₹6,305.20** in delivered revenue.
-- **Business logic:** Group delivered orders by payment_method and sum calculated revenue.
-- **Business meaning:** The payment method with the highest number of transactions is not necessarily the one with the highest revenue.
-- **Possible action:** Track both transaction volume and revenue contribution when evaluating payment methods.
+## 6. Delivered Revenue by Payment Method
 
-### 7. Repeat Purchasers
+- **Business question:** How much delivered revenue came from each payment method?
+- **Result:**
+  - Card: ₹47,002.05
+  - UPI: ₹28,573.85
+  - Cash: ₹6,305.20
+- **Insight:** Card contributed the largest delivered revenue in this sample, while UPI had the highest delivered-order count.
+- **Business use:** Review both revenue and order count instead of relying on only one metric.
 
-- **Finding:** **10 customers** placed more than one delivered order.
-- **Business logic:** Group delivered orders by customer_id and use HAVING COUNT(*) > 1.
-- **Business meaning:** The sample contains a meaningful group of repeat purchasers.
-- **Possible action:** A future analysis can investigate what products, segments or locations are associated with repeat purchasing.
+## 7. Repeat Purchasers
 
-### 8. Highest-Revenue Customer ID
+- **Business question:** How many customer IDs had more than one delivered order?
+- **Result:** 10 customer IDs.
+- **Insight:** Ten customers in the sample made repeat delivered purchases.
+- **Business use:** With more data, compare repeat purchasing across customer segments, locations or product categories. Those comparisons are outside this version's no-JOIN scope.
 
-- **Finding:** Customer **107** generated approximately **₹14,744.50**, the highest delivered revenue among customers in this dataset.
-- **Business logic:** Group delivered orders by customer_id, calculate revenue and sort descending.
-- **Business meaning:** A small number of customers may contribute a significant amount of revenue.
-- **Possible action:** Analyze high-value customer behavior further after JOINs are learned.
+## 8. Highest-Revenue Customer
 
-### 9. Highest-Value Delivered Order
+- **Business question:** Which customer ID generated the highest delivered revenue?
+- **Result:** Customer ID 107 — ₹14,744.50.
+- **Insight:** Customer ID 107 had the highest total delivered revenue among customer IDs in this sample.
+- **Business use:** Use this as a starting point for further customer-level analysis; the ID alone does not explain why the customer spent more.
 
-- **Finding:** Order **1010** has the highest delivered order value at approximately **₹6,648.10**.
-- **Business logic:** Calculate order value and use a basic subquery to identify the maximum.
-- **Business meaning:** This identifies the largest individual transaction in the current sample.
-- **Possible action:** Examine the product and customer characteristics behind high-value orders in the next project version.
+## 9. Highest-Value Delivered Order
 
-## Scope Note
+- **Business question:** Which delivered order had the highest calculated order value?
+- **Result:** Order ID 1010 — ₹6,648.10.
+- **Insight:** Order 1010 was the largest delivered transaction in the sample, after discount.
+- **Business use:** A future analysis could examine its product and customer details once table relationships and JOINs are learned.
 
-The findings in this file come from the current sample dataset and the SQL queries included in this project. Customer IDs are used for order-level customer analysis; customer names and product categories are not matched to order records in this version.
+## Limitations
+
+- This is a small sample dataset of 30 orders, not a representative dataset of a real e-commerce company.
+- Findings describe only the records included in this project.
+- Customer-level analysis uses customer IDs from the orders table.
+- This version does not use JOINs, so it does not connect order transactions to customer names or product categories.
+- Revenue is calculated from the provided quantity, unit price and discount fields; it should not be interpreted as profit because other costs are not included.
+
