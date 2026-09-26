@@ -67,6 +67,6 @@ The project currently focuses on order, revenue, payment and repeat-customer ana
 - **Business meaning:** This identifies the largest individual transaction in the current sample.
 - **Possible action:** Examine the product and customer characteristics behind high-value orders in the next project version.
 
-## Important Scope Note
+## Scope Note
 
-The current version intentionally does not use JOINs or CASE WHEN because those concepts have not been learned yet. The project will be expanded progressively as new SQL concepts are learned.
+The findings in this file come from the current sample dataset and the SQL queries included in this project. Customer IDs are used for order-level customer analysis; customer names and product categories are not matched to order records in this version.
